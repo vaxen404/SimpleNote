@@ -2,7 +2,7 @@
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
-  modules: ['@nuxt/icon/module'],
+  modules: ['@nuxt/icon/module', '@nuxtjs/mdc'],
 
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -16,6 +16,9 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: ['@vue/devtools-core']
+    }
   }
 })

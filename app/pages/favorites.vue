@@ -1,5 +1,7 @@
 <template>
-    <h1>favorites</h1>
+    <div class="flex min-h-screen">
+        <NotesNoteList favorites-only/>
+    </div>
 </template>
 
 <script setup lang="ts">

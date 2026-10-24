@@ -7,7 +7,10 @@
             <span class="text-xl font-semibold">SimpleNote</span>
         </div>
 
-        <button class="flex items-center justify-center gap-2 rounded-lg bg-blue-600 p-3 text-white hover:bg-blue-500 cursor-pointer">
+        <button 
+            @click="isAddNoteOpen = true"
+            class="flex items-center justify-center gap-2 rounded-lg bg-blue-600 p-3 text-white hover:bg-blue-500 cursor-pointer"
+        >
             <Icon name="lucide:plus" size="20" />
             Yeni Not
         </button>
@@ -39,12 +42,17 @@
             </NuxtLink>
         </div>
     </div>
+
+    <NotesNoteModal
+        :open="isAddNoteOpen"
+        @close="isAddNoteOpen = false"
+    />
 </template>
 
 <script setup lang="ts">
-const notes = ref([])
-const favorites = ref([])
-const archives = ref([])
+const { notes, favorites, archives } = useNoteActions()
+
+const isAddNoteOpen = ref(false)
 </script>
 
 <style scoped>

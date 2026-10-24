@@ -1,5 +1,7 @@
 <template>
-    <h1>archives</h1>
+    <div class="flex min-h-screen">
+        <NotesNoteList archives-only/>
+    </div>
 </template>
 
 <script setup lang="ts">
