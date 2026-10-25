@@ -4,6 +4,7 @@ CREATE TABLE "users" (
     "username" VARCHAR(50) NOT NULL,
     "email" VARCHAR(255),
     "password_hash" TEXT NOT NULL,
+    "note_limit" INTEGER NOT NULL DEFAULT 40,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

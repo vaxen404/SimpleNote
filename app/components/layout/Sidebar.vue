@@ -16,7 +16,7 @@
         </button>
 
         <div class="flex flex-col gap-2">
-            <NuxtLink to="/" class="menu-link">
+            <NuxtLink to="/notes" class="menu-link">
                 <Icon name="lucide:file-text" size="20" />
                 <span>Tüm Notlar</span>
                 <span class="ml-auto">{{ notes.length }}</span>

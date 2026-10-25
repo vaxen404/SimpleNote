@@ -12,10 +12,11 @@ model User {
   username     String   @unique @db.VarChar(50)
   email        String?  @unique @db.VarChar(255)
   passwordHash String   @map("password_hash")
+  noteLimit    Int      @default(20) @map("note_limit")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  notes        Note[]
+  notes Note[]
 
   @@map("users")
 }

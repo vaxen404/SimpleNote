@@ -1,6 +1,6 @@
 <template>
   <div class="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-    <div class="w-full max-w-lg rounded-3xl border border-gray-200 bg-white p-10">
+    <div class="w-full max-w-lg rounded-3xl border border-gray-200 bg-white p-10 shadow-lg">
       <h1 class="mb-10 text-3xl font-semibold text-gray-800">
         Login
       </h1>
