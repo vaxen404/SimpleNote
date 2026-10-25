@@ -22,3 +22,20 @@ logs
 .env
 .env.*
 !.env.example
+
+# Prisma generated client
+/generated/prisma/
+
+# Local scripts (optional)
+/scripts/
+
+# Local environment and database
+.env
+.env.*
+!.env.example
+*.db
+*.db-journal
+
+# Editor and temporary files
+.vscode/
+*.tsbuildinfo

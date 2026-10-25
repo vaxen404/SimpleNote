@@ -1,12 +1,8 @@
 <template>
-    <div class="flex min-h-screen">
-        <NotesNoteList />
-    </div>
+    <div></div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-    layout: 'user'
-})
-
+// const currentUser = useAuthUser()
+// await navigateTo(currentUser.value ? '/home' : '/login')
 </script>

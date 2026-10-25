@@ -101,7 +101,7 @@ const filteredNotes = computed(() => {
         const matchesFavorite = !props.favoritesOnly || note.favorite
         
         const matchesArchived = props.archivesOnly
-        ? note.archived
+        ? note.archived 
         : !note.archived
         
         return matchesSearch && matchesFavorite && matchesArchived

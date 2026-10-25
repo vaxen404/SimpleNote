@@ -12,13 +12,24 @@
   "dependencies": {
     "@nuxt/icon": "^2.5.1",
     "@nuxtjs/mdc": "^0.23.2",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tiptap/pm": "^3.32.0",
     "@tiptap/starter-kit": "^3.32.0",
     "@tiptap/vue-3": "^3.32.0",
+    "argon2": "^0.45.1",
+    "dotenv": "^18.0.9",
     "nuxt": "^4.6.2",
+    "pg": "^8.23.1",
     "tailwindcss": "^4.3.3",
     "vue": "^3.5.44",
     "vue-router": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/pg": "^8.23.1",
+    "prisma": "^7.10.1",
+    "tsx": "^4.23.15"
   }
 }
