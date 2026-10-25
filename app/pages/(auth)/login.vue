@@ -23,11 +23,13 @@
                 <input 
                     v-model="password"
                     :type="isView ? 'text' : 'password'"
-                    autocomplete="username"
+                    autocomplete="current-password"
                     class="h-full min-w-0 flex-1 bg-transparent outline-none"
                 >
                 <button
                     v-if="password.length > 0"
+                    type="button"
+                    class="cursor-pointer text-gray-500"
                     @click="isView = !isView"
                 >
                     <Icon :name="isView ? 'lucide:eye' : 'lucide:eye-closed'" />
@@ -35,9 +37,13 @@
             </div>
         </div>
 
-        <button class="flex w-full h-12 rounded-lg items-center justify-center gap-1 bg-blue-600 text-white text-lg font-semibold cursor-pointer hover:bg-blue-500">
+        <button 
+            type="submit"
+            :disabled="isLoading"
+            class="flex w-full h-12 rounded-lg items-center justify-center gap-1 bg-blue-600 text-white text-lg font-semibold cursor-pointer hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+        >
             <Icon name="lucide:lock" />
-            Login
+            {{ isLoading ? 'Logging in...' : 'Login' }}
         </button>
       </form>
 
@@ -47,12 +53,49 @@
 
 
 <script setup lang="ts">
+const { openToast } = useToast()
+
 const username = ref('')
 const password = ref('')
 
 const isView = ref(false)
 
-const submit = () => {
-    console.log(username.value);
+
+const isLoading = ref(false)
+
+const currentUser = useAuthUser()
+
+const submit = async () => {
+    if (!username.value.trim() || !password.value) {
+        openToast('Kullanıcı adı ve şifre gerekli.', 'error')
+        return
+    }
+
+    isLoading.value = true
+
+    try {
+        const repsonse = await $fetch('/api/auth/login', {
+            method: 'POST',
+            body: {
+                username: username.value.trim(),
+                password: password.value
+            }
+        })
+
+        currentUser.value = repsonse.user
+
+        await navigateTo('/notes')
+        
+        openToast('Giriş başarılı!', 'success')
+
+    } catch (err: any) {
+        openToast(
+            err.data?.message || 'Giriş sırasında bir hata oluştu.',
+            'error'
+        )
+    } finally {
+        isLoading.value = false
+    }
 }
+
 </script>

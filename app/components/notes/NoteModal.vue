@@ -33,7 +33,7 @@
                 </div>
 
                 <form class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-6 pb-6" @submit.prevent="submit">
-                    <div>
+                    <div>   
                         <label class="mb-1 block font-semibold">
                             Başlık
                         </label>

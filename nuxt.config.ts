@@ -12,7 +12,14 @@ export default defineNuxtConfig({
   components: true,
 
   imports: {
-    autoImport: true
+    dirs: [
+        'composables',
+        'composables/**',
+        'utils',
+        'utils/**',
+        'shared/schemas',
+        'shared/schemas/**'
+    ]
   },
 
   vite: {
