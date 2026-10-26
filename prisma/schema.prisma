@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -7,14 +8,20 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model Users {
   id           String   @id @default(uuid()) @db.Uuid
   username     String   @unique @db.VarChar(50)
   email        String?  @unique @db.VarChar(255)
   passwordHash String   @map("password_hash")
-  noteLimit    Int      @default(20) @map("note_limit")
+  avatarUrl    String?  @map("avatar_url")
+  role         Role     @default(USER)
+  noteLimit    Int      @default(25) @map("note_limit")
   createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
 
   notes Note[]
 
@@ -31,7 +38,7 @@ model Note {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user      Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("notes")

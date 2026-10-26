@@ -1,5 +1,5 @@
 <template>
-    <div class="flex h-screen w-64 flex-col gap-6 border-r border-gray-200 p-6">
+    <div class="flex h-screen w-64 flex-col gap-4 border-r border-gray-200 p-4">
         <div class="flex items-center gap-4">
             <div class="flex items-center justify-center bg-blue-600 p-2 rounded-lg">
                 <Icon name="lucide:notebook-pen" size="20" class="text-white" />
@@ -35,12 +35,7 @@
             </NuxtLink>
         </div>
 
-        <div class="mt-auto">
-            <NuxtLink to="/settings" class="menu-link">
-                <Icon name="lucide:settings" size="20" />
-                Ayarlar
-            </NuxtLink>
-        </div>
+        <LayoutProfileMenu />
     </div>
 
     <NotesNoteModal

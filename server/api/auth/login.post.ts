@@ -56,7 +56,11 @@ export default defineEventHandler(async (event) => {
             user: {
                 id: user.id,
                 username: user.username,
-                email: user.email
+                email: user.email,
+                avatarUrl: user.avatarUrl,
+                role: user.role,
+                noteLimit: user.noteLimit,
+                cratedAt: user.createdAt.toISOString()
             }
         }
     } catch (err: any) {

@@ -2,6 +2,10 @@ export type AuthUser = {
     id: string
     username: string
     email: string | null
+    avatarUrl: string
+    role: 'USER' | 'ADMIN',
+    noteLimit: number
+    createdAt: string
 }
 
 export const useAuthUser = () => {

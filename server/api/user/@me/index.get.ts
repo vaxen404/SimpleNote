@@ -20,7 +20,9 @@ export default defineEventHandler(async (event) =>  {
                 id: true,
                 username: true,
                 email: true,
+                role: true,
                 noteLimit: true,
+                avatarUrl: true,
                 createdAt: true
             }
         })
@@ -36,7 +38,9 @@ export default defineEventHandler(async (event) =>  {
             id: user.id,
             username: user.username,
             email: user.email,
+            role: user.role,
             noteLimit: user.noteLimit,
+            avatarUrl: user.avatarUrl,
             createdAt: user.createdAt
         }
     } catch (err: any) {
