@@ -123,6 +123,25 @@ node --env-file=.env .output/server/index.mjs
 
 Use HTTPS in production because session cookies have the `Secure` flag in production mode. If configuration is supplied through the process environment, omit `--env-file=.env`. Authentication and database operations require a running server; static hosting alone is insufficient.
 
+
+## Roadmap
+
+SimpleNote is under active development. Planned improvements include:
+
+- [x] User authentication
+- [x] Note creation and Markdown preview
+- [x] Note search
+- [x] Soft-delete functionality
+- [ ] Persistent note editing
+- [ ] Favorites and archives persistence
+- [ ] Trash management and note restoration
+- [ ] Account settings and profile management
+- [ ] Logout functionality
+- [ ] Theme customization
+- [ ] Responsive UI improvements
+
+Features and priorities may change as development continues.
+
 ## Project Status
 
 **🚧 Work in Progress — Under Active Development**
