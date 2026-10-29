@@ -87,7 +87,9 @@ const props = defineProps<{
     archivesOnly?: boolean
 }>()
 
-const { notes, toggleFavorite, isFavorite, deleteNote, toggleArchive } = useNoteActions()
+const { notes, fetchNotes, toggleFavorite, isFavorite, deleteNote, toggleArchive } = useNoteActions()
+
+await callOnce('fetch-notes', fetchNotes)
 
 const searchQuery = ref('') 
 

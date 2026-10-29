@@ -28,7 +28,9 @@ export default defineEventHandler(async (event) => {
             notes
         }
     } catch (err: any) {
+        console.log(err.message);
         if (err.statusCode) throw err
+
 
         throw createError({
             statusCode: 500,
