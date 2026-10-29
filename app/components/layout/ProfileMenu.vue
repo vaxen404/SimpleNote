@@ -44,8 +44,7 @@
             <button
                 type="button"
                 class="menu-item danger disabled:opacity-50"
-                :disabled="isLoggingOut"
-                @click="logout"
+                @click="openLogoutModal"
             >
                 <Icon name="lucide:log-out" size="18" />
                 Log Out
@@ -86,16 +85,18 @@
             />
         </button>
     </div>
+
+    <UiLogoutModal
+        :open="showLogoutModal"
+        @close="showLogoutModal = false"
+    />
 </template>
 
 <script setup lang="ts">
 const currentUser = useAuthUser()
-const authLoaded = useAuthLoaded()
-const { openToast } = useToast()
 
 const username = computed(() => currentUser.value?.username ?? 'Guest')
 const isOpen = ref(false)
-const isLoggingOut = ref(false)
 const menuRef = ref<HTMLElement | null>(null)
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -118,29 +119,12 @@ onBeforeUnmount(() => {
     document.removeEventListener('keydown', handleKeydown)
 })
 
-const logout = async () => {
-    if (!isLoggingOut.value) return
-
-    isLoggingOut.value = true
-
-    try {
-        await $fetch('/api/auth/logout', {
-            method: 'POST'
-        })
-
-        currentUser.value = null
-        authLoaded.value = true
-        isOpen.value = false
-
-        await navigateTo('/login')
-
-        openToast('Logged out successfully', 'success')
-    } catch {
-        openToast('Failed to log out.', 'error')
-    } finally {
-        isLoggingOut.value = false
-    }
+const openLogoutModal = () => {
+    isOpen.value = false
+    showLogoutModal.value = true
 }
+
+const showLogoutModal = ref(false)
 </script>
 
 <style scoped>
