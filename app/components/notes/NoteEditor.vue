@@ -46,7 +46,7 @@
 
         <div class="flex flex-col justify-center gap-3 pb-4 border-b border-gray-200">
             <h1 class="text-3xl font-semibold">{{ note.title }}</h1>
-            <span class="text-md text-gray-400">{{ note.date }}</span>
+            <span class="text-md text-gray-400">{{ note.createdAt }}</span>
         </div>
 
         <div class="min-h-0 flex-1 overflow-y-auto">
@@ -73,7 +73,9 @@ const props = defineProps<{
         content: string,
         favorite: boolean,
         archived: boolean,
-        date: string
+        trashedAt: string | null
+        createdAt: string
+        updatedAt: string
     }
 }>()
 

@@ -4,7 +4,10 @@ interface Note {
     content: string,
     favorite: boolean,
     archived: boolean,
-    date: string
+    trashedAt: string | null
+    createdAt: string
+    updatedAt: string
+
 }
 
 export const useNoteActions = () => {
@@ -47,7 +50,11 @@ export const useNoteActions = () => {
         notes.value[index] = { ...updatedNote }
     } 
 
-    const deleteNote = (id: string) => {
+    const deleteNote = async (id: string) => {
+        await $fetch(`/api/notes/${id}`, {
+            method: 'DELETE'
+        })
+
         notes.value = notes.value.filter(
             note => note.id !== id
         )

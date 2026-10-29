@@ -98,7 +98,9 @@ const props = defineProps<{
         content: string
         favorite: boolean
         archived: boolean
-        date: string
+        trashedAt: string | null
+        createdAt: string
+        updatedAt: string
     }
 }>()
 

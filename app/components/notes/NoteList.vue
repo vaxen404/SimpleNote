@@ -39,7 +39,7 @@
                 </p>
     
                 <p class="mt-1 text-xs text-gray-400">
-                    {{ note.date }}
+                    {{ note.createdAt }}
                 </p>
             </div>
         </div>
@@ -93,20 +93,21 @@ await callOnce('fetch-notes', fetchNotes)
 
 const searchQuery = ref('') 
 
-
 const filteredNotes = computed(() => {
     return notes.value.filter(note => {
         const matchesSearch = note.title
-        .toLowerCase()
-        .includes(searchQuery.value.toLowerCase())
+            .toLowerCase()
+            .includes(searchQuery.value.toLowerCase())
         
         const matchesFavorite = !props.favoritesOnly || note.favorite
         
         const matchesArchived = props.archivesOnly
-        ? note.archived 
-        : !note.archived
+            ? note.archived 
+            : !note.archived
+
+        const matchesTrash = note.trashedAt === null
         
-        return matchesSearch && matchesFavorite && matchesArchived
+        return matchesSearch && matchesFavorite && matchesArchived && matchesTrash
     })
 }) 
 
