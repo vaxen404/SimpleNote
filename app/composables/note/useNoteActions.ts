@@ -1,13 +1,13 @@
+
 interface Note {
-    id: string,
-    title: string,
-    content: string,
-    favorite: boolean,
-    archived: boolean,
+    id: string
+    title: string
+    content: string
+    favorite: boolean
+    archived: boolean
     trashedAt: string | null
     createdAt: string
     updatedAt: string
-
 }
 
 export const useNoteActions = () => {
@@ -19,21 +19,19 @@ export const useNoteActions = () => {
         const response = await requestFetch<{
             success: boolean
             notes: Note[]
-        }>(
-            '/api/notes'
-        )
+        }>('/api/notes')
 
         notes.value = response.notes
     }
 
     const addNote = async (title: string, content: string) => {
-        const response = await $fetch<{ success: boolean, note: Note }>(
-            '/api/notes',
-            {
-                method: 'POST',
-                body: { title, content }
-            }
-        )
+        const response = await $fetch<{
+            success: boolean
+            note: Note
+        }>('/api/notes', {
+            method: 'POST',
+            body: { title, content }
+        })
 
         notes.value.push(response.note)
 
@@ -48,7 +46,7 @@ export const useNoteActions = () => {
         if (index === -1) return
 
         notes.value[index] = { ...updatedNote }
-    } 
+    }
 
     const deleteNote = async (id: string) => {
         await $fetch(`/api/notes/${id}`, {
@@ -60,11 +58,19 @@ export const useNoteActions = () => {
         )
     }
 
-    const favorites = computed(() => {
-        return notes.value.filter(
-            note => note.favorite
+    const activeNotes = computed(() =>
+        notes.value.filter(note =>
+            !note.archived && note.trashedAt == null
         )
-    })
+    )
+
+    const favorites = computed(() =>
+        notes.value.filter(note =>
+            note.favorite &&
+            !note.archived &&
+            note.trashedAt == null
+        )
+    )
 
     const toggleFavorite = (id: string) => {
         const note = notes.value.find(
@@ -83,11 +89,15 @@ export const useNoteActions = () => {
     }
 
     const archives = computed(() =>
-        notes.value.filter(note => note.archived)
+        notes.value.filter(note =>
+            note.archived && note.trashedAt == null
+        )
     )
 
     const toggleArchive = (id: string) => {
-        const note = notes.value.find(note => note.id === id)
+        const note = notes.value.find(
+            note => note.id === id
+        )
 
         if (!note) return
 
@@ -106,6 +116,7 @@ export const useNoteActions = () => {
         addNote,
         saveNote,
         deleteNote,
+        activeNotes,
         favorites,
         toggleFavorite,
         isFavorite,

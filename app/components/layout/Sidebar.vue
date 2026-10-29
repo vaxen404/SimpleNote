@@ -17,7 +17,7 @@
             <NuxtLink to="/notes" class="menu-link">
                 <Icon name="lucide:file-text" size="20" />
                 <span>Tüm Notlar</span>
-                <span class="ml-auto">{{ notes.length }}</span>
+                <span class="ml-auto">{{ activeNotes.length }}</span>
             </NuxtLink>
 
             <NuxtLink to="/favorites" class="menu-link">
@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-const { notes, favorites, archives } = useNoteActions()
+const { activeNotes, favorites, archives } = useNoteActions()
 
 const isAddNoteOpen = ref(false)
 </script>

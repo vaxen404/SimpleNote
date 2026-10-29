@@ -42,6 +42,25 @@
                     {{ note.createdAt }}
                 </p>
             </div>
+
+            <div 
+                v-if="filteredNotes.length === 0"
+                class="flex flex-1 flex-col items-center mt-6 gap-2 text-center"
+            >
+                <Icon
+                    :name="emptyState.icon"
+                    size="40"
+                    class="text-gray-400"
+                />
+                
+                <h2 class="font-medium text-gray-700">
+                    {{ emptyState.title }}
+                </h2>
+
+                <p class="text-sm text-gray-400">
+                    {{ emptyState.description }}
+                </p>
+            </div>
         </div>
     </div>
 
@@ -50,8 +69,26 @@
         :note="selectedNote"
     />
 
-    <div v-else class="flex flex-1 items-center justify-center">
-        Bir not seç.
+    <div v-else class="flex flex-1 flex-col items-center justify-center gap-3">
+        <Icon
+            :name="filteredNotes.length === 0
+                ? emptyState.icon
+                : 'solar:document-text-linear'"
+            size="52"
+            class="text-gray-300"
+        />
+
+        <h2 class="text-lg font-semibold text-gray-700">
+            {{ filteredNotes.length === 0 ? emptyState.title : 'Bir not seç' }}
+        </h2>
+
+        <p class="text-sm text-gray-400">
+            {{ 
+                filteredNotes.length === 0 
+                    ? emptyState.description
+                    : 'Görüntülemek için listeden bir not seç.'    
+            }}
+        </p>
     </div>
 
     <NotesNoteContextMenu
@@ -75,8 +112,6 @@
         :note="noteToEdit"
         @close="isContextEditing = false"
     />
-
-
 </div>
 </template>
 
@@ -87,45 +122,72 @@ const props = defineProps<{
     archivesOnly?: boolean
 }>()
 
-const { notes, fetchNotes, toggleFavorite, isFavorite, deleteNote, toggleArchive } = useNoteActions()
+const { notes, fetchNotes, toggleFavorite, isFavorite, deleteNote, toggleArchive, activeNotes, favorites, archives } = useNoteActions()
 
 await callOnce('fetch-notes', fetchNotes)
 
 const searchQuery = ref('') 
 
 const filteredNotes = computed(() => {
-    return notes.value.filter(note => {
-        const matchesSearch = note.title
-            .toLowerCase()
-            .includes(searchQuery.value.toLowerCase())
-        
-        const matchesFavorite = !props.favoritesOnly || note.favorite
-        
-        const matchesArchived = props.archivesOnly
-            ? note.archived 
-            : !note.archived
+    const source = props.archivesOnly 
+        ?  archives.value
+        : props.favoritesOnly
+            ? favorites.value
+            : activeNotes.value
 
-        const matchesTrash = note.trashedAt === null
-        
-        return matchesSearch && matchesFavorite && matchesArchived && matchesTrash
-    })
+    return source.filter(note => 
+        note.title.toLowerCase().includes(
+            searchQuery.value.trim().toLowerCase()
+        )
+    )
 }) 
 
-watch(filteredNotes, () => {
-    if (!filteredNotes.value.some(note => note.id === activeNoteId.value)) {
-        activeNoteId.value = filteredNotes.value[0]?.id ?? null
+const emptyState = computed(() => {
+    if (searchQuery.value.trim()) {
+        return {
+            title: 'Sonuç bulunamadı',
+            description: 'Aramanla eşleşen not bulunamadı.',
+            icon: 'solar:magnifer-linear'
+        }
+    }
+
+    if (props.archivesOnly) {
+        return {
+            title: 'Arşiv boş',
+            description: 'Arşivlediğin notlar burada görünür.',
+            icon: 'solar:archive-linear'
+        }
+    }
+
+    if (props.favoritesOnly) {
+        return {
+            title: 'Henüz favorin yok',
+            description: 'Favorilere eklediğin notlar burada görünür.',
+            icon: 'solar:star-linear'
+        }
+    }
+
+    return {
+        title: 'Henüz notun yok',
+        description: 'İlk notunu oluşturarak başlayabilirsin.',
+        icon: 'solar:notes-minimalistic-linear'
     }
 })
 
-const activeNoteId = ref<string | null>(filteredNotes.value[0]?.id ?? null)
+const activeNoteId = ref<string | null>(null)
 
 const selectedNote = computed(() => {
-    return notes.value.find(note => note.id === activeNoteId.value)
+    return filteredNotes.value.find(
+        note => note.id === activeNoteId.value
+    )
 })
 
-watch(notes, () => {
-    if (!notes.value.some(note => note.id === activeNoteId.value)) {
-        activeNoteId.value = notes.value[0]?.id ?? null
+watch(filteredNotes, list => {
+    if (
+        activeNoteId.value &&
+        !list.some(note => note.id === activeNoteId.value)
+    ) {
+        activeNoteId.value = null
     }
 })
 
