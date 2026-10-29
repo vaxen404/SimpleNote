@@ -127,7 +127,7 @@ const props = defineProps<{
 
 const { notes, fetchNotes, toggleFavorite, isFavorite, deleteNote, toggleArchive, activeNotes, favorites, archives } = useNoteActions()
 
-await callOnce('fetch-notes', fetchNotes)
+await fetchNotes()
 
 const searchQuery = ref('') 
 
