@@ -1,9 +1,7 @@
 <template>
     <div class="flex h-screen w-64 flex-col gap-4 border-r border-gray-200 p-4">
-        <div class="flex items-center gap-4">
-            <div class="flex items-center justify-center bg-blue-600 p-2 rounded-lg">
-                <Icon name="lucide:notebook-pen" size="20" class="text-white" />
-            </div>
+        <div class="flex items-center gap-2">
+            <img src="/logo.png" alt="Logo" class="size-8 rounded-lg">
             <span class="text-xl font-semibold">SimpleNote</span>
         </div>
 
