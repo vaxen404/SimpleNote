@@ -1,117 +1,120 @@
 <template>
-<div class="flex min-h-screen w-full">
-    
-    <div class="flex h-screen w-96 flex-col border-r border-gray-200 p-3">
-        <div class="flex w-full h-12 items-center gap-2 rounded-xl bg-gray-100 border border-gray-200 p-3">
-            <Icon name="lucide:search" size="20"/>
-            <input 
-                type="text"
-                v-model="searchQuery"
-                placeholder="Notlarda ara..."
-                class="h-full min-w-0 flex-1 outline-none"
-            >
-        </div>
-    
-        <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pt-4"> 
-            <div 
-                v-for="note in filteredNotes" 
-                :key="note.id" 
-                @click="activeNoteId = note.id"
-                :class="activeNoteId === note.id 
-                    ? 'bg-blue-50 border-l-4 border-l-blue-500 border-blue-100' 
-                    : 'border border-gray-200 hover:bg-gray-100'"
-                class="cursor-pointer rounded-lg border p-4"
-                @contextmenu.prevent="openContextMenu($event, note.id)"
-            >
-                <div class="flex items-center justify-between">
-                    <h3 class="font-semibold">{{ note.title }}</h3>
-    
-                    <Icon
-                        @click.stop="toggleFavorite(note.id)"
-                        :name="isFavorite(note.id) ? 'solar:star-bold' : 'solar:star-linear'"
-                        :class="isFavorite(note.id) ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'"
-                        size="18"
-                    />
+<div class="flex h-screen w-full flex-col">
+    <LayoutHeaderbar />
+
+    <div class="flex min-h-0 flex-1">
+        <div class="flex h-screen w-96 flex-col border-r border-gray-200 p-3">
+            <div class="flex w-full h-12 items-center gap-2 rounded-xl bg-gray-100 border border-gray-200 p-3">
+                <Icon name="lucide:search" size="20"/>
+                <input 
+                    type="text"
+                    v-model="searchQuery"
+                    placeholder="Notlarda ara..."
+                    class="h-full min-w-0 flex-1 outline-none"
+                >
+            </div>
+        
+            <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pt-4"> 
+                <div 
+                    v-for="note in filteredNotes" 
+                    :key="note.id" 
+                    @click="activeNoteId = note.id"
+                    :class="activeNoteId === note.id 
+                        ? 'bg-blue-50 border-l-4 border-l-blue-500 border-blue-100' 
+                        : 'border border-gray-200 hover:bg-gray-100'"
+                    class="cursor-pointer rounded-lg border p-4"
+                    @contextmenu.prevent="openContextMenu($event, note.id)"
+                >
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold">{{ note.title }}</h3>
+        
+                        <Icon
+                            @click.stop="toggleFavorite(note.id)"
+                            :name="isFavorite(note.id) ? 'solar:star-bold' : 'solar:star-linear'"
+                            :class="isFavorite(note.id) ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'"
+                            size="18"
+                        />
+                    </div>
+        
+                    <p class="mt-1 truncate text-sm text-gray-500">
+                        {{ note.content }}
+                    </p>
+        
+                    <p class="mt-1 text-xs text-gray-400">
+                        {{ note.createdAt }}
+                    </p>
                 </div>
     
-                <p class="mt-1 truncate text-sm text-gray-500">
-                    {{ note.content }}
-                </p>
+                <div 
+                    v-if="filteredNotes.length === 0"
+                    class="flex flex-1 flex-col items-center mt-6 gap-2 text-center"
+                >
+                    <Icon
+                        :name="emptyState.icon"
+                        size="40"
+                        class="text-gray-400"
+                    />
+                    
+                    <h2 class="font-medium text-gray-700">
+                        {{ emptyState.title }}
+                    </h2>
     
-                <p class="mt-1 text-xs text-gray-400">
-                    {{ note.createdAt }}
-                </p>
-            </div>
-
-            <div 
-                v-if="filteredNotes.length === 0"
-                class="flex flex-1 flex-col items-center mt-6 gap-2 text-center"
-            >
-                <Icon
-                    :name="emptyState.icon"
-                    size="40"
-                    class="text-gray-400"
-                />
-                
-                <h2 class="font-medium text-gray-700">
-                    {{ emptyState.title }}
-                </h2>
-
-                <p class="text-sm text-gray-400">
-                    {{ emptyState.description }}
-                </p>
+                    <p class="text-sm text-gray-400">
+                        {{ emptyState.description }}
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-
-    <NotesNoteEditor
-        v-if="selectedNote"
-        :note="selectedNote"
-    />
-
-    <div v-else class="flex flex-1 flex-col items-center justify-center gap-3">
-        <Icon
-            :name="filteredNotes.length === 0
-                ? emptyState.icon
-                : 'solar:document-text-linear'"
-            size="52"
-            class="text-gray-300"
+    
+        <NotesNoteEditor
+            v-if="selectedNote"
+            :note="selectedNote"
         />
-
-        <h2 class="text-lg font-semibold text-gray-700">
-            {{ filteredNotes.length === 0 ? emptyState.title : 'Bir not seç' }}
-        </h2>
-
-        <p class="text-sm text-gray-400">
-            {{ 
-                filteredNotes.length === 0 
-                    ? emptyState.description
-                    : 'Görüntülemek için listeden bir not seç.'    
-            }}
-        </p>
+    
+        <div v-else class="flex flex-1 flex-col items-center justify-center gap-3">
+            <Icon
+                :name="filteredNotes.length === 0
+                    ? emptyState.icon
+                    : 'solar:document-text-linear'"
+                size="52"
+                class="text-gray-400"
+            />
+    
+            <h2 class="text-lg font-semibold text-gray-700">
+                {{ filteredNotes.length === 0 ? emptyState.title : 'Bir not seç' }}
+            </h2>
+    
+            <p class="text-sm text-gray-400">
+                {{ 
+                    filteredNotes.length === 0 
+                        ? emptyState.description
+                        : 'Görüntülemek için listeden bir not seç.'    
+                }}
+            </p>
+        </div>
+    
+        <NotesNoteContextMenu
+            v-if="contextMenu && contextNote"
+            :open="true"
+            :x="contextMenu.x"
+            :y="contextMenu.y"
+            :favorite="contextNote.favorite"
+            :archived="contextNote.archived"
+            @close="closeContextMenu"
+            @edit="editFromContextMenu"
+            @favorite="handleContextAction('favorite')"
+            @archive="handleContextAction('archive')"
+            @delete="handleContextAction('delete')"
+        />
+    
+        <NotesNoteModal
+            v-if="noteToEdit"
+            :open="isContextEditing"
+            mode="edit"
+            :note="noteToEdit"
+            @close="isContextEditing = false"
+        />
     </div>
-
-    <NotesNoteContextMenu
-        v-if="contextMenu && contextNote"
-        :open="true"
-        :x="contextMenu.x"
-        :y="contextMenu.y"
-        :favorite="contextNote.favorite"
-        :archived="contextNote.archived"
-        @close="closeContextMenu"
-        @edit="editFromContextMenu"
-        @favorite="handleContextAction('favorite')"
-        @archive="handleContextAction('archive')"
-        @delete="handleContextAction('delete')"
-    />
-
-    <NotesNoteModal
-        v-if="noteToEdit"
-        :open="isContextEditing"
-        mode="edit"
-        :note="noteToEdit"
-        @close="isContextEditing = false"
-    />
 </div>
 </template>
 

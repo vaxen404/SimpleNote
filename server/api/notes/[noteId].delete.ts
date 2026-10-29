@@ -30,6 +30,7 @@ export default defineEventHandler(async event => {
                 trashedAt: null
             },
             data: {
+                isTrashed: true,
                 trashedAt: new Date()
             }
         })

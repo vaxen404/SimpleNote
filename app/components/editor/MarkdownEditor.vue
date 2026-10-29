@@ -5,7 +5,7 @@
             <div class="flex gap-2">
                 <button
                     type="button"
-                    class="cursor-pointer rounded-lg px-4 py-2 text-sm"
+                    class="flex items-center cursor-pointer rounded-lg px-4 py-2 text-sm gap-1"
                     :class="activeTab === 'write' ? 'bg-blue-100 text-blue-600' : 'text-gray-500'"
                     @click="activeTab = 'write'"
                 >
@@ -15,7 +15,7 @@
 
                 <button
                     type="button"
-                    class="cursor-pointer rounded-lg px-4 py-2 text-sm"
+                    class="flex items-center cursor-pointer rounded-lg px-4 py-2 text-sm gap-1"
                     :class="activeTab === 'preview' ? 'bg-blue-100 text-blue-600' : 'text-gray-500'"
                     @click="activeTab = 'preview'"
                 >

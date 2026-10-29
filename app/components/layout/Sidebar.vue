@@ -5,57 +5,43 @@
             <span class="text-xl font-semibold">SimpleNote</span>
         </div>
 
-        <button 
-            @click="isAddNoteOpen = true"
-            class="flex items-center justify-center gap-2 rounded-lg bg-blue-600 p-3 text-white hover:bg-blue-500 cursor-pointer"
-        >
-            <Icon name="lucide:plus" size="20" />
-            Yeni Not
-        </button>
-
         <div class="flex flex-col gap-2">
+            <p class="mt-2 text-sm font-semibold text-gray-600">MAIN MENU</p>
             <NuxtLink to="/notes" class="menu-link">
                 <Icon name="lucide:file-text" size="20" />
-                <span>Tüm Notlar</span>
+                <span>Notes</span>
                 <span class="ml-auto">{{ activeNotes.length }}</span>
             </NuxtLink>
 
             <NuxtLink to="/favorites" class="menu-link">
                 <Icon name="lucide:star" size="20" />
-                <span>Favoriler</span>
+                <span>Favorites</span>
                 <span class="ml-auto">{{ favorites.length }}</span>
             </NuxtLink>
 
             <NuxtLink to="/archives" class="menu-link">
                 <Icon name="lucide:archive" size="20" />
-                <span>Arşiv</span>
+                <span>Archives</span>
                 <span class="ml-auto">{{ archives.length }}</span>
             </NuxtLink>
         </div>
 
         <LayoutProfileMenu />
     </div>
-
-    <NotesNoteModal
-        :open="isAddNoteOpen"
-        @close="isAddNoteOpen = false"
-    />
 </template>
 
 <script setup lang="ts">
 const { activeNotes, favorites, archives } = useNoteActions()
-
-const isAddNoteOpen = ref(false)
 </script>
 
 <style scoped>
     @reference "tailwindcss";
     
     .menu-link {
-        @apply flex items-center gap-3 p-3 rounded-lg;
+        @apply flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100;
     }
 
     .menu-link.router-link-active {
-        @apply bg-blue-100 text-blue-600;
+        @apply bg-blue-100 text-blue-600 hover:bg-blue-100;
     }
 </style>
