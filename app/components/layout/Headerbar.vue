@@ -34,6 +34,7 @@ const route = useRoute()
 const pageTitle = computed(() => {
     if (route.path === '/favorites') return 'Favorites'
     if (route.path === '/archives') return 'Archives'
+    if (route.path === '/trash') return 'Trash'
     return 'Notes'
 })
 

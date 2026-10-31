@@ -15,7 +15,7 @@
                     Düzenle
                 </button>
 
-                <button class="menu-item" @click="emit('favorite')">
+                <button v-if="!archived" class="menu-item" @click="emit('favorite')">
                     <Icon
                         :name="favorite ? 'solar:star-bold' : 'solar:star-linear'"
                         size="18"

@@ -39,6 +39,11 @@
                 Settings
             </NuxtLink>
 
+            <NuxtLink to="/trash" class="menu-item" @click="isOpen = false">
+                <Icon name="lucide:trash-2" size="18" />
+                Trash
+            </NuxtLink>
+            
             <div class="my-2 border-t border-gray-200" />
 
             <button

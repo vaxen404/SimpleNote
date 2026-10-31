@@ -5,6 +5,7 @@ interface Note {
     content: string
     favorite: boolean
     archived: boolean
+    isTrashed: boolean,
     trashedAt: string | null
     createdAt: string
     updatedAt: string
@@ -38,12 +39,20 @@ export const useNoteActions = () => {
         return response.note
     }
 
-    const saveNote = (updatedNote: Note) => {
+    const saveNote = async (updatedNote: Note) => {
         const index = notes.value.findIndex(
             note => note.id === updatedNote.id
         )
 
         if (index === -1) return
+
+        await $fetch(`/api/notes/${updatedNote.id}`, {
+            method: 'PATCH',
+            body: {
+                title: updatedNote.title,
+                content: updatedNote.content
+            }
+        })
 
         notes.value[index] = { ...updatedNote }
     }
@@ -60,26 +69,33 @@ export const useNoteActions = () => {
 
     const activeNotes = computed(() =>
         notes.value.filter(note =>
-            !note.archived && note.trashedAt == null
+            !note.archived && !note.isTrashed
         )
     )
 
     const favorites = computed(() =>
         notes.value.filter(note =>
-            note.favorite &&
-            !note.archived &&
-            note.trashedAt == null
+            note.favorite && !note.archived && !note.isTrashed
         )
     )
 
-    const toggleFavorite = (id: string) => {
+    const toggleFavorite = async (id: string) => {
         const note = notes.value.find(
             note => note.id === id
         )
 
         if (!note) return
 
-        note.favorite = !note.favorite
+        const favorite = !note.favorite
+
+        await $fetch(`/api/notes/${note.id}`, {
+            method: 'PATCH',
+            body: {
+                favorite
+            }
+        })
+
+        note.favorite = favorite
     }
 
     const isFavorite = (id: string): boolean => {
@@ -90,18 +106,27 @@ export const useNoteActions = () => {
 
     const archives = computed(() =>
         notes.value.filter(note =>
-            note.archived && note.trashedAt == null
+            note.archived && !note.isTrashed
         )
     )
 
-    const toggleArchive = (id: string) => {
+    const toggleArchive = async (id: string) => {
         const note = notes.value.find(
             note => note.id === id
         )
 
         if (!note) return
 
-        note.archived = !note.archived
+        const archived = !note.archived
+
+        await $fetch(`/api/notes/${note.id}`, {
+            method: 'PATCH',
+            body: {
+                archived
+            }
+        })
+
+        note.archived = archived
     }
 
     const isArchived = (id: string): boolean => {
@@ -109,6 +134,10 @@ export const useNoteActions = () => {
             note => note.id === id && note.archived
         )
     }
+
+    const trash = computed(() =>
+        notes.value.filter(note => note.isTrashed)
+    )
 
     return {
         notes,
@@ -122,6 +151,7 @@ export const useNoteActions = () => {
         isFavorite,
         archives,
         toggleArchive,
-        isArchived
+        isArchived,
+        trash
     }
 }

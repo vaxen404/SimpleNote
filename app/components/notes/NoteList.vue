@@ -1,9 +1,9 @@
 <template>
-<div class="flex h-screen w-full flex-col">
+<div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
     <LayoutHeaderbar />
 
     <div class="flex min-h-0 flex-1">
-        <div class="flex h-screen w-96 flex-col border-r border-gray-200 p-3">
+        <div class="flex min-h-0 w-96 shrink-0 flex-col border-r border-gray-200 p-3">
             <div class="flex w-full h-12 items-center gap-2 rounded-xl bg-gray-100 border border-gray-200 p-3">
                 <Icon name="lucide:search" size="20"/>
                 <input 
@@ -29,6 +29,7 @@
                         <h3 class="font-semibold">{{ note.title }}</h3>
         
                         <Icon
+                            v-if="!trashOnly && !archivesOnly"
                             @click.stop="toggleFavorite(note.id)"
                             :name="isFavorite(note.id) ? 'solar:star-bold' : 'solar:star-linear'"
                             :class="isFavorite(note.id) ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'"
@@ -123,20 +124,23 @@
 const props = defineProps<{
     favoritesOnly?: boolean
     archivesOnly?: boolean
+    trashOnly?: boolean
 }>()
 
-const { notes, fetchNotes, toggleFavorite, isFavorite, deleteNote, toggleArchive, activeNotes, favorites, archives } = useNoteActions()
+const { notes, fetchNotes, toggleFavorite, isFavorite, deleteNote, toggleArchive, activeNotes, favorites, archives, trash } = useNoteActions()
 
 await fetchNotes()
 
 const searchQuery = ref('') 
 
 const filteredNotes = computed(() => {
-    const source = props.archivesOnly 
-        ?  archives.value
-        : props.favoritesOnly
-            ? favorites.value
-            : activeNotes.value
+    const source = props.trashOnly
+        ? trash.value
+        : props.archivesOnly 
+            ?  archives.value
+            : props.favoritesOnly
+                ? favorites.value
+                : activeNotes.value
 
     return source.filter(note => 
         note.title.toLowerCase().includes(
@@ -167,6 +171,14 @@ const emptyState = computed(() => {
             title: 'Henüz favorin yok',
             description: 'Favorilere eklediğin notlar burada görünür.',
             icon: 'solar:star-linear'
+        }
+    }
+
+    if (props.trashOnly) {
+        return {
+            title: 'Çöp kutusu boş',
+            description: 'Sildiğin notlar burada görünür.',
+            icon: 'lucide:trash-2'
         }
     }
 
