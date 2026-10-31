@@ -4,40 +4,115 @@
         <LayoutHeaderbar />
 
         <div class="flex min-h-0 flex-1">
-            <div class="flex min-h-0 w-96 shrink-0 flex-col border-r border-gray-200 p-3">
+            <div class="flex min-h-0 w-106 shrink-0 flex-col border-r border-gray-200 p-3">
                 <div class="flex h-12 items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 p-3">
                     <Icon name="lucide:search" size="20" />
 
                     <input
                         v-model="searchQuery"
                         type="text"
-                        placeholder="Çöp kutusunda ara..."
+                        placeholder="Search in trash..."
                         class="min-w-0 flex-1 outline-none"
                     >
                 </div>
 
-                <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pt-4">
+                <div v-if="!isSelecting" class="mt-3 flex justify-end">
+                    <button
+                        :disabled="!filteredNotes.length || isProcessing"
+                        class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="startSelection"
+                    >
+                        <Icon name="lucide:list-checks" size="18" />
+                        Select
+                    </button>
+                </div>
+
+                <div
+                    v-else
+                    class="mt-3 flex flex-col gap-3 rounded-lg bg-blue-50 p-3"
+                >
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="whitespace-nowrap rounded-full bg-blue-100 px-2.5 py-1 text-sm font-semibold text-blue-700">
+                            {{ selectedNoteIds.length }} selected
+                        </span>
+
+                        <div class="flex items-center gap-2">
+                            <button
+                                :disabled="isProcessing"
+                                class="cursor-pointer text-xs font-medium text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                                @click="selectAllNotes"
+                            >
+                                Select All
+                            </button>
+
+                            <div class="h-5 w-px bg-gray-200"></div>
+
+                            <button
+                                :disabled="isProcessing"
+                                class="cursor-pointer text-xs font-semibold text-gray-500 hover:text-gray-800 disabled:opacity-50"
+                                @click="cancelSelection"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button
+                            :disabled="!selectedNoteIds.length || isProcessing"
+                            class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                            @click="restoreSelectedNotes"
+                        >
+                            <Icon name="lucide:rotate-ccw" size="16" />
+                            Restore Selected
+                        </button>
+
+                        <button
+                            :disabled="!selectedNoteIds.length || isProcessing"
+                            class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            @click="confirmDeleteSelected"
+                        >
+                            <Icon name="lucide:trash-2" size="16" />
+                            Delete Selected
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-2 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pt-4">
                     <div
                         v-for="note in filteredNotes"
                         :key="note.id"
-                        class="cursor-pointer rounded-lg border p-4"
-                        :class="activeNoteId === note.id
-                            ? 'border-blue-100 border-l-4 border-l-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:bg-gray-100'"
-                        @click="activeNoteId = note.id"
-                        @contextmenu.prevent="openContextMenu($event, note.id)"
+                        class="flex cursor-pointer items-center gap-4 rounded-lg border p-4"
+                        :class="selectedNoteIds.includes(note.id) && isSelecting
+                            ? 'border-blue-200 bg-blue-50'
+                            : activeNoteId === note.id && !isSelecting
+                                ? 'border-blue-100 border-l-4 border-l-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:bg-gray-100'"
+                        @click="handleNoteClick(note.id)"
+                        @contextmenu.prevent="!isSelecting && openContextMenu($event, note.id)"
                     >
-                        <h3 class="truncate font-semibold">
-                            {{ note.title }}
-                        </h3>
+                        <input
+                            v-if="isSelecting"
+                            type="checkbox"
+                            :checked="selectedNoteIds.includes(note.id)"
+                            :disabled="isProcessing"
+                            class="mt-1 size-4 shrink-0 cursor-pointer accent-blue-600"
+                            @click.stop="toggleNoteSelection(note.id)"
+                        >
 
-                        <p class="mt-1 truncate text-sm text-gray-500">
-                            {{ note.content }}
-                        </p>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="truncate font-semibold">
+                                {{ note.title }}
+                            </h3>
 
-                        <p class="mt-1 text-xs text-gray-400">
-                            {{ formatDate(note.trashedAt) }}
-                        </p>
+                            <p class="mt-1 truncate text-sm text-gray-500">
+                                {{ note.content }}
+                            </p>
+
+                            <p class="mt-1 text-xs text-gray-400">
+                                {{ formatDate(note.trashedAt) }}
+                            </p>
+                        </div>
                     </div>
 
                     <div
@@ -54,34 +129,63 @@
 
                         <h2 class="font-medium text-gray-700">
                             {{ searchQuery.trim()
-                                ? 'Sonuç bulunamadı'
-                                : 'Çöp kutusu boş' }}
+                                ? 'No results found'
+                                : 'Trash is empty' }}
                         </h2>
 
                         <p class="text-sm text-gray-400">
                             {{ searchQuery.trim()
-                                ? 'Aramanla eşleşen not bulunamadı.'
-                                : 'Sildiğin notlar burada görünür.' }}
+                                ? 'No notes match your search.'
+                                : 'Deleted notes will appear here.' }}
                         </p>
                     </div>
                 </div>
             </div>
 
             <div class="flex min-w-0 flex-1 flex-col">
+                <div class="flex items-center justify-between border-b border-gray-200 p-3">
+                    <div class="flex items-center gap-2 text-gray-500">
+                        <Icon name="lucide:trash-2" />
+                        Trash
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button
+                            :disabled="!trash.length || isProcessing"
+                            class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                            @click="restoreAllNotes"
+                        >
+                            <Icon name="lucide:rotate-ccw" size="18" />
+                            Restore All
+                        </button>
+
+                        <button
+                            :disabled="!trash.length || isProcessing"
+                            class="flex cursor-pointer items-center gap-2 rounded-lg border border-red-200 bg-red-500 px-3 py-2 text-sm text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            @click="confirmDeleteAll"
+                        >
+                            <Icon name="lucide:trash-2" size="18" />
+                            Delete All
+                        </button>
+                    </div>
+                </div>
+
                 <template v-if="selectedNote">
                     <div class="min-h-0 flex-1 overflow-y-auto p-6">
                         <div class="flex flex-wrap items-center justify-end gap-3">
                             <button
-                                class="flex cursor-pointer items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 text-sm hover:bg-gray-100"
-                                
+                                :disabled="isProcessing"
+                                class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
+                                @click="restoreSingleNote(selectedNote.id)"
                             >
                                 <Icon name="lucide:rotate-ccw" size="18" />
                                 Restore
                             </button>
 
                             <button
-                                class="flex cursor-pointer items-center gap-2 border border-red-200 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                                
+                                :disabled="isProcessing"
+                                class="flex cursor-pointer items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                                @click="confirmDeleteSingle(selectedNote.id)"
                             >
                                 <Icon name="lucide:trash-2" size="18" />
                                 Delete Permanently
@@ -123,17 +227,17 @@
                     <h2 class="text-lg font-semibold text-gray-700">
                         {{ filteredNotes.length === 0
                             ? searchQuery.trim()
-                                ? 'Sonuç bulunamadı'
-                                : 'Çöp kutusu boş'
-                            : 'Bir not seç' }}
+                                ? 'No results found'
+                                : 'Trash is empty'
+                            : 'Select a note' }}
                     </h2>
 
                     <p class="text-sm text-gray-400">
                         {{ filteredNotes.length === 0
                             ? searchQuery.trim()
-                                ? 'Aramanla eşleşen not bulunamadı.'
-                                : 'Sildiğin notlar burada görünür.'
-                            : 'Görüntülemek için listeden bir not seç.' }}
+                                ? 'No notes match your search.'
+                                : 'Deleted notes will appear here.'
+                            : 'Select a note from the list to view it.' }}
                     </p>
                 </div>
             </div>
@@ -148,29 +252,42 @@
             @restore="handleRestore"
             @delete="handleDelete"
         />
-    </div>
 
-    <NotesDeleteModal
-        :open="pendingDeleteId !== null"
-        :loading="isDeleting"
-        @close="pendingDeleteId = null"
-        @confirm="confirmDelete"
-    />
+        <NotesDeleteModal
+            :open="pendingDeleteIds.length > 0"
+            :loading="isDeleting"
+            @close="closeDeleteModal"
+            @confirm="confirmDelete"
+        />
+    </div>
 </template>
 
 <script setup lang="ts">
-const { trash, fetchNotes } = useNoteActions()
+const {
+    trash,
+    fetchNotes,
+    restoreNote,
+    permanentlyDeleteNote
+} = useNoteActions()
 
 await fetchNotes()
 
 const searchQuery = ref('')
 const activeNoteId = ref<string | null>(null)
 
+const isSelecting = ref(false)
+const selectedNoteIds = ref<string[]>([])
+
+const pendingDeleteIds = ref<string[]>([])
+
+const isProcessing = ref(false)
+const isDeleting = ref(false)
+
 const filteredNotes = computed(() => {
+    const query = searchQuery.value.trim().toLowerCase()
+
     return trash.value.filter(note =>
-        note.title.toLowerCase().includes(
-            searchQuery.value.trim().toLowerCase()
-        )
+        note.title.toLowerCase().includes(query)
     )
 })
 
@@ -189,14 +306,130 @@ watch(filteredNotes, list => {
     }
 })
 
+watch(trash, list => {
+    const validIds = new Set(list.map(note => note.id))
+
+    selectedNoteIds.value = selectedNoteIds.value.filter(
+        id => validIds.has(id)
+    )
+})
+
 const formatDate = (date: string | null) => {
-    if (!date) return 'Bilinmiyor'
+    if (!date) return 'Unknown'
 
     const parsed = new Date(date)
 
-    if (Number.isNaN(parsed.getTime())) return 'Bilinmiyor'
+    if (Number.isNaN(parsed.getTime())) {
+        return 'Unknown'
+    }
 
-    return parsed.toLocaleDateString('tr-TR')
+    return parsed.toLocaleDateString('en-US')
+}
+
+const handleNoteClick = (noteId: string) => {
+    if (isProcessing.value) return
+
+    if (isSelecting.value) {
+        toggleNoteSelection(noteId)
+        return
+    }
+
+    activeNoteId.value = noteId
+}
+
+const startSelection = () => {
+    if (isProcessing.value) return
+
+    isSelecting.value = true
+    selectedNoteIds.value = []
+}
+
+const cancelSelection = () => {
+    if (isProcessing.value) return
+
+    isSelecting.value = false
+    selectedNoteIds.value = []
+}
+
+const toggleNoteSelection = (noteId: string) => {
+    if (!isSelecting.value || isProcessing.value) return
+
+    const index = selectedNoteIds.value.indexOf(noteId)
+
+    if (index === -1) {
+        selectedNoteIds.value.push(noteId)
+    } else {
+        selectedNoteIds.value.splice(index, 1)
+    }
+}
+
+const selectAllNotes = () => {
+    if (isProcessing.value) return
+
+    const visibleIds = filteredNotes.value.map(note => note.id)
+
+    selectedNoteIds.value = [
+        ...new Set([
+            ...selectedNoteIds.value,
+            ...visibleIds
+        ])
+    ]
+}
+
+const restoreSingleNote = async (noteId: string) => {
+    if (isProcessing.value) return
+
+    isProcessing.value = true
+
+    try {
+        await restoreNote(noteId)
+    } catch (error) {
+        console.error('Restore failed:', error)
+    } finally {
+        isProcessing.value = false
+    }
+}
+
+const restoreSelectedNotes = async () => {
+    if (!selectedNoteIds.value.length || isProcessing.value) return
+
+    isProcessing.value = true
+
+    try {
+        const ids = [...selectedNoteIds.value]
+
+        for (const id of ids) {
+            await restoreNote(id)
+        }
+
+        isSelecting.value = false
+        selectedNoteIds.value = []
+    } catch (error) {
+        console.error('Restore selected failed:', error)
+    } finally {
+        isProcessing.value = false
+    }
+}
+
+const restoreAllNotes = async () => {
+    if (!trash.value.length || isProcessing.value) return
+
+    isProcessing.value = true
+
+    try {
+        const ids = trash.value.map(note => note.id)
+
+        for (const id of ids) {
+            await restoreNote(id)
+        }
+
+        isSelecting.value = false
+        selectedNoteIds.value = []
+    } catch (error) {
+        console.error('Restore all failed:', error)
+    } finally {
+        isProcessing.value = false
+    }
 }
 
 const contextMenu = ref<{
@@ -206,13 +439,21 @@ const contextMenu = ref<{
 } | null>(null)
 
 const openContextMenu = (event: MouseEvent, id: string) => {
+    if (isProcessing.value) return
+
     const menuWidth = 208
     const menuHeight = 110
 
     contextMenu.value = {
         id,
-        x: Math.max(8, Math.min(event.clientX, window.innerWidth - menuWidth - 8)),
-        y: Math.max(8, Math.min(event.clientY, window.innerHeight - menuHeight- 8))
+        x: Math.max(
+            8,
+            Math.min(event.clientX, window.innerWidth - menuWidth - 8)
+        ),
+        y: Math.max(
+            8,
+            Math.min(event.clientY, window.innerHeight - menuHeight - 8)
+        )
     }
 }
 
@@ -220,17 +461,14 @@ const closeContextMenu = () => {
     contextMenu.value = null
 }
 
-const pendingDeleteId = ref<string | null>(null)
-const isDeleting = ref(false)
-
-const handleRestore = () => {
+const handleRestore = async () => {
     const id = contextMenu.value?.id
 
     closeContextMenu()
 
     if (!id) return
 
-    
+    await restoreSingleNote(id)
 }
 
 const handleDelete = () => {
@@ -240,15 +478,55 @@ const handleDelete = () => {
 
     if (!id) return
 
-    pendingDeleteId.value = id
+    confirmDeleteSingle(id)
 }
 
-const confirmDelete = () => {
-    if (!pendingDeleteId.value) return
+const confirmDeleteSingle = (noteId: string) => {
+    if (isProcessing.value) return
 
-    console.log('Permanently delete:', pendingDeleteId.value)
+    pendingDeleteIds.value = [noteId]
+}
 
-    pendingDeleteId.value = null
+const confirmDeleteSelected = () => {
+    if (!selectedNoteIds.value.length || isProcessing.value) return
+
+    pendingDeleteIds.value = [...selectedNoteIds.value]
+}
+
+const confirmDeleteAll = () => {
+    if (!trash.value.length || isProcessing.value) return
+
+    pendingDeleteIds.value = trash.value.map(note => note.id)
+}
+
+const closeDeleteModal = () => {
+    if (isDeleting.value) return
+
+    pendingDeleteIds.value = []
+}
+
+const confirmDelete = async () => {
+    if (!pendingDeleteIds.value.length || isProcessing.value) return
+
+    const ids = [...pendingDeleteIds.value]
+
+    isProcessing.value = true
+    isDeleting.value = true
+
+    try {
+        for (const id of ids) {
+            await permanentlyDeleteNote(id)
+        }
+
+        pendingDeleteIds.value = []
+        isSelecting.value = false
+        selectedNoteIds.value = []
+    } catch (error) {
+        console.error('Permanent delete failed:', error)
+    } finally {
+        isDeleting.value = false
+        isProcessing.value = false
+    }
 }
 </script>
 

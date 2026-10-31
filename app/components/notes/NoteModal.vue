@@ -7,7 +7,7 @@
             @pointerdown.capture="startedOnBackdrop = $event.target === $event.currentTarget"
             @click.self="startedOnBackdrop && close()"
         >
-            <div class="flex max-h[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
                 <div class="flex items-center justify-between p-6">
                     <div class="flex items-center gap-3">
                         <div class="flex size-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
@@ -38,13 +38,22 @@
                             Başlık
                         </label>
 
-                        <input 
+                        <input
                             v-model="title"
                             type="text"
                             maxlength="32"
                             placeholder="Not başlığı..."
-                            class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none focus:border-blue-500"
+                            class="w-full rounded-xl border bg-gray-50 px-4 py-3 outline-none focus:border-blue-500"
+                            :class="errors.title ? 'border-red-500' : 'border-gray-200'"
                         >
+
+                        <p
+                            v-if="errors.title"
+                            class="mt-2 flex items-center gap-1.5 text-sm font-medium text-red-600"
+                        >
+                            <Icon name="lucide:circle-alert" size="16" />
+                            {{ errors.title }}
+                        </p>
 
                         <p 
                             class="mt-1 text-right text-sm text-gray-400"
@@ -58,7 +67,20 @@
                             İçerik
                         </label>
 
-                        <EditorMarkdownEditor v-model="content"/>
+                        <div
+                            class="overflow-hidden rounded-xl border"
+                            :class="errors.content ? 'border-red-500' : 'border-gray-200'"
+                        >
+                            <EditorMarkdownEditor v-model="content" />
+                        </div>
+
+                        <p
+                            v-if="errors.content"
+                            class="mt-2 flex items-center gap-1.5 text-sm font-medium text-red-600"
+                        >
+                            <Icon name="lucide:circle-alert" size="16" />
+                            {{ errors.content }}
+                        </p>
 
                         <p class="mt-1 text-right text-sm text-gray-400">
                             {{ content.length }} karakter
@@ -76,10 +98,10 @@
 
                         <button
                             type="submit"
-                            :disabled="!title.trim() || !content.trim()"
-                            class="cursor-pointer rounded-lg bg-blue-600 px-6 py-2.5 font-medium text-white hover:bg-blue-700"
+                            :disabled="isSubmitting"
+                            class="cursor-pointer rounded-lg bg-blue-600 px-6 py-2.5 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            Oluştur
+                            {{ isSubmitting ? 'Kaydediliyor...' : mode === 'edit' ? 'Kaydet' : 'Oluştur' }}
                         </button>
                     </div>
                 </form>
@@ -98,6 +120,7 @@ const props = defineProps<{
         content: string
         favorite: boolean
         archived: boolean
+        isTrashed: boolean
         trashedAt: string | null
         createdAt: string
         updatedAt: string
@@ -107,16 +130,31 @@ const props = defineProps<{
 const emit = defineEmits(['close'])
 
 const { addNote, saveNote } = useNoteActions()
+const { openToast } = useToast()
 
 const startedOnBackdrop = ref(false)
 
 const title = ref('')
 const content = ref('')
 
+const errorMessage = ref('')
+const isSubmitting = ref(false)
+
+
+const errors = ref({
+    title: '',
+    content: ''
+})
+
 watch(
     () => [props.open, props.note, props.mode] as const,
     () => {
         if (!props.open) return
+
+        errors.value = {
+            title: '',
+            content: ''
+        }
 
         title.value = props.mode === 'edit'
             ? props.note?.title ?? ''
@@ -129,25 +167,72 @@ watch(
     { immediate: true }
 )
 
-const submit = () => {
-    if (!title.value.trim() || !content.value.trim()) return
 
-    if (props.mode === 'edit' && props.note) {
-        saveNote({
-            ...props.note,
-            title: title.value.trim(),
-            content: content.value
-        })
-    } else {
-        addNote(title.value.trim(), content.value)
+const submit = async () => {
+    if (isSubmitting.value) return
+
+    errors.value = {
+        title: '',
+        content: ''
     }
 
-    close()
+    const result = createNoteSchema.safeParse({
+        title: title.value,
+        content: content.value
+    })
+
+    if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors
+
+        errors.value.title = fieldErrors.title?.[0] ?? ''
+        errors.value.content = fieldErrors.content?.[0] ?? ''
+
+        return
+    }
+
+    isSubmitting.value = true
+
+    try {
+        if (props.mode === 'edit' && props.note) {
+            await saveNote({
+                ...props.note,
+                title: result.data.title,
+                content: result.data.content
+            })
+        } else {
+            await addNote(
+                result.data.title,
+                result.data.content
+            )
+        }
+
+        close()
+    } catch (err) {
+        console.error('Note save error:', err)
+        openToast('Not kaydedilirken bir hata oluştu.', 'error')
+    } finally {
+        isSubmitting.value = false
+    }
 }
 
 const close = () => {
     title.value = ''
     content.value = ''
+
+    errors.value = {
+        title: '',
+        content: ''
+    }
+
     emit('close')
 }
+
+watch(title, () => {
+    errors.value.title = ''
+})
+
+watch(content, () => {
+    errors.value.content = ''
+})
+
 </script>

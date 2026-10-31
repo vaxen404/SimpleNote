@@ -76,7 +76,8 @@ export default defineEventHandler(async (event) => {
                 data: {
                     userId: user.id,
                     title: title.trim(),
-                    content
+                    content,
+                    isTrashed: false
                 }
             })
 

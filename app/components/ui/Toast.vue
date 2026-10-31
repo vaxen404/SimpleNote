@@ -1,20 +1,35 @@
+
 <template>
     <Teleport to="body">
         <div class="fixed bottom-5 right-5 z-50 flex flex-col gap-2">
-            <div 
+            <div
                 v-for="toast in toasts"
                 :key="toast.id"
-                class="flex min-w-72 items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-lg"
+                class="flex min-w-72 max-w-md items-center gap-3 rounded-xl border p-4 shadow-lg"
+                :class="toast.type === 'success'
+                    ? 'border-green-200 bg-green-50'
+                    : 'border-red-200 bg-red-50'"
             >
-                <Icon
-                    :name="toast.type === 'success'
-                        ? 'lucide:check-circle'
-                        : 'lucide:circle-alert'"
-                    :class="toast.type === 'success' ? 'text-green-500' : 'text-red-500'"
-                    size: 20
-                />
+                <div
+                    class="flex size-9 shrink-0 items-center justify-center rounded-full"
+                    :class="toast.type === 'success'
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-red-100 text-red-600'"
+                >
+                    <Icon
+                        :name="toast.type === 'success'
+                            ? 'lucide:check'
+                            : 'lucide:circle-alert'"
+                        size="20"
+                    />
+                </div>
 
-                <span class="flex-1 text-sm text-gray-700">
+                <span
+                    class="flex-1 text-sm font-medium"
+                    :class="toast.type === 'success'
+                        ? 'text-green-800'
+                        : 'text-red-800'"
+                >
                     {{ toast.message }}
                 </span>
 

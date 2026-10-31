@@ -3,7 +3,7 @@
     <LayoutHeaderbar />
 
     <div class="flex min-h-0 flex-1">
-        <div class="flex min-h-0 w-96 shrink-0 flex-col border-r border-gray-200 p-3">
+        <div class="flex min-h-0 w-106 shrink-0 flex-col border-r border-gray-200 p-3">
             <div class="flex w-full h-12 items-center gap-2 rounded-xl bg-gray-100 border border-gray-200 p-3">
                 <Icon name="lucide:search" size="20"/>
                 <input 
